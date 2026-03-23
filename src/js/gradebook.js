@@ -4,6 +4,9 @@
 (function initializeGradebookModel(global) {
   "use strict";
 
+  const MIN_GRADE = 0;
+  const MAX_GRADE = 100;
+
   // Small built-in dataset used for informal testing and CSV load fallback
   const SAMPLE_DATA = [
     ["Student", "Lab 1", "Lab 2", "Lab 3", "Midterm", "Final"],
@@ -36,8 +39,8 @@
       });
   }
 
-  // Safely turns grade-like input into a finite number or returns null when invalid
-  function parseNumericGrade(value) {
+  // Safely turns any input into a finite number or returns null when invalid.
+  function parseFiniteNumber(value) {
     if (value === null || value === undefined) {
       return null;
     }
@@ -54,6 +57,54 @@
 
     const parsedValue = Number(trimmedValue);
     return Number.isFinite(parsedValue) ? parsedValue : null;
+  }
+
+  // Checks whether a numeric grade falls inside the accepted 0-100 range.
+  function isGradeInRange(value) {
+    return value >= MIN_GRADE && value <= MAX_GRADE;
+  }
+
+  // Safely turns grade-like input into a finite in-range grade or returns null when invalid.
+  function parseNumericGrade(value) {
+    const parsedValue = parseFiniteNumber(value);
+    return parsedValue !== null && isGradeInRange(parsedValue) ? parsedValue : null;
+  }
+
+  // Validates user-entered grade input before it is saved into the gradebook.
+  function validateGradeInput(value) {
+    const normalizedValue = value === null || value === undefined ? "" : String(value).trim();
+
+    if (normalizedValue === "") {
+      return {
+        isValid: true,
+        normalizedValue: "",
+        message: ""
+      };
+    }
+
+    const numericValue = parseFiniteNumber(normalizedValue);
+
+    if (numericValue === null) {
+      return {
+        isValid: false,
+        normalizedValue: normalizedValue,
+        message: "Grades must be numeric values from 0 to 100."
+      };
+    }
+
+    if (!isGradeInRange(numericValue)) {
+      return {
+        isValid: false,
+        normalizedValue: normalizedValue,
+        message: "Grades must be between 0 and 100."
+      };
+    }
+
+    return {
+      isValid: true,
+      normalizedValue: normalizedValue,
+      message: ""
+    };
   }
 
   // Normalizes CSV-style rows into a structure that is easy to access by row and column
@@ -179,10 +230,15 @@
       return false;
     }
 
-    const normalizedValue = value === null || value === undefined ? "" : String(value).trim();
-    gradebook.rows[rowIndex].grades[colIndex] = normalizedValue;
-    gradebook.rawMatrix[rowIndex][colIndex] = normalizedValue;
-    gradebook.rawRows[rowIndex + 1][colIndex + 1] = normalizedValue;
+    const validation = validateGradeInput(value);
+
+    if (!validation.isValid) {
+      return false;
+    }
+
+    gradebook.rows[rowIndex].grades[colIndex] = validation.normalizedValue;
+    gradebook.rawMatrix[rowIndex][colIndex] = validation.normalizedValue;
+    gradebook.rawRows[rowIndex + 1][colIndex + 1] = validation.normalizedValue;
     return true;
   }
 
@@ -362,6 +418,8 @@
     console.log("Gradebook valid row index 1:", isValidRowIndex(sampleGradebook, 1));
     console.log("Gradebook valid column index 4:", isValidColumnIndex(sampleGradebook, 4));
     console.log("Gradebook ignores invalid number:", parseNumericGrade("not-a-grade"));
+    console.log("Gradebook rejects negative grade:", validateGradeInput("-5"));
+    console.log("Gradebook rejects grade above 100:", validateGradeInput("110"));
   }
 
   // Expose the model utilities globally so the other page scripts can reuse them
@@ -369,7 +427,10 @@
     SAMPLE_DATA: cloneRows(SAMPLE_DATA),
     parseCsvText: parseCsvText,
     parseGradeData: parseGradeData,
+    parseFiniteNumber: parseFiniteNumber,
     parseNumericGrade: parseNumericGrade,
+    isGradeInRange: isGradeInRange,
+    validateGradeInput: validateGradeInput,
     getNumericArray: getNumericArray,
     getCellRawValue: getCellRawValue,
     setCellValue: setCellValue,

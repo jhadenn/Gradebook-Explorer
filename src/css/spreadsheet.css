@@ -134,6 +134,24 @@ h1 {
   font-size: 0.95rem;
 }
 
+/* Inline validation and save feedback shown above the table. */
+.feedback-message {
+  min-height: 1.2rem;
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+/* Error state for rejected grade edits. */
+.feedback-message.is-error {
+  color: #b42318;
+}
+
+/* Success/info state for general save feedback. */
+.feedback-message.is-info {
+  color: #0f766e;
+}
+
 /* Aligns the section title and table status line. */
 .section-header {
   display: flex;

@@ -91,6 +91,19 @@
     renderChartForSelection();
   }
 
+  // Shows feedback near the table for validation errors and save-related messages.
+  function setFeedbackMessage(message, messageType) {
+    const feedback = $("#gradebook-feedback");
+
+    feedback
+      .text(message || "")
+      .removeClass("is-error is-info");
+
+    if (message) {
+      feedback.addClass(messageType === "error" ? "is-error" : "is-info");
+    }
+  }
+
   // Clears any existing selection highlight and resets the output panels.
   function deselectAll() {
     $("#gradebook-table .selected").removeClass("selected");
@@ -217,8 +230,38 @@
     const rowIndex = Number(activeCell.attr("data-row-index"));
     const colIndex = Number(activeCell.attr("data-col-index"));
     const previousValue = activeCell.attr("data-previous-value") || "";
-    const nextValue = saveChanges ? input.val() : previousValue;
-    const normalizedValue = nextValue === undefined || nextValue === null ? "" : String(nextValue).trim();
+    const nextValue = input.val();
+
+    if (!saveChanges) {
+      activeCell
+        .removeClass("editing-cell")
+        .removeAttr("data-previous-value")
+        .text(previousValue);
+      appState.editingCell = null;
+
+      return {
+        rowIndex: rowIndex,
+        colIndex: colIndex,
+        blocked: false
+      };
+    }
+
+    const validation = model.validateGradeInput(nextValue);
+
+    if (!validation.isValid) {
+      setFeedbackMessage(validation.message, "error");
+      global.setTimeout(function refocusInvalidEditor() {
+        input.trigger("focus").trigger("select");
+      }, 0);
+
+      return {
+        rowIndex: rowIndex,
+        colIndex: colIndex,
+        blocked: true
+      };
+    }
+
+    const normalizedValue = validation.normalizedValue;
 
     model.setCellValue(appState.gradebook, rowIndex, colIndex, normalizedValue);
     activeCell
@@ -226,6 +269,7 @@
       .removeAttr("data-previous-value")
       .text(normalizedValue);
     appState.editingCell = null;
+    setFeedbackMessage("", "info");
 
     if (
       appState.selection &&
@@ -237,7 +281,8 @@
 
     return {
       rowIndex: rowIndex,
-      colIndex: colIndex
+      colIndex: colIndex,
+      blocked: false
     };
   }
 
@@ -249,7 +294,11 @@
       return;
     }
 
-    stopEditingCell(true);
+    const stopResult = stopEditingCell(true);
+
+    if (stopResult && stopResult.blocked) {
+      return;
+    }
 
     const currentValue = cell.text().trim();
     const input = $("<input>", {
@@ -284,7 +333,12 @@
       return;
     }
 
-    stopEditingCell(true);
+    const stopResult = stopEditingCell(true);
+
+    if (stopResult && stopResult.blocked) {
+      return;
+    }
+
     global.setTimeout(function openAdjacentEditor() {
       startEditingCell(getGradeCell(nextRowIndex, nextColIndex));
     }, 0);
@@ -315,7 +369,12 @@
 
     // Clicking a student name selects that entire row.
     table.on("click", "th.row-header", function handleRowClick() {
-      stopEditingCell(true);
+      const stopResult = stopEditingCell(true);
+
+      if (stopResult && stopResult.blocked) {
+        return;
+      }
+
       selectRow(Number($(this).attr("data-row-index")));
     });
 
@@ -323,7 +382,12 @@
     table.on("click", "th.column-header", function handleColumnClick() {
       const colIndex = Number($(this).attr("data-col-index"));
 
-      stopEditingCell(true);
+      const stopResult = stopEditingCell(true);
+
+      if (stopResult && stopResult.blocked) {
+        return;
+      }
+
       sortByColumn(colIndex);
       selectColumn(colIndex);
     });
@@ -341,6 +405,7 @@
       } else if (event.key === "Escape") {
         event.preventDefault();
         stopEditingCell(false);
+        setFeedbackMessage("", "info");
       } else if (event.key === "ArrowUp") {
         event.preventDefault();
         moveEditingCell(-1, 0);
@@ -374,6 +439,7 @@
     appState.editingCell = null;
     appState.sort.columnIndex = null;
     appState.sort.direction = "asc";
+    setFeedbackMessage("", "info");
     renderGradebookTable(gradebook);
     attachEventHandlers();
     updateSelectionOutputs();
