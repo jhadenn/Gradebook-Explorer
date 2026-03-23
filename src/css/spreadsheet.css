@@ -134,6 +134,15 @@ h1 {
   font-size: 0.95rem;
 }
 
+/* Aligns the section title and table status line. */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
 /* Enables horizontal scrolling for the table on narrower screens */
 .table-scroll {
   overflow-x: auto;
@@ -174,6 +183,12 @@ th {
   user-select: none;
 }
 
+/* Slight emphasis for a column that is currently sorted. */
+.column-header.sorted-asc,
+.column-header.sorted-desc {
+  color: #111827;
+}
+
 /* Default appearance of editable grade cells */
 .grade-cell {
   background: #ffffff;
@@ -205,6 +220,32 @@ th {
 /* Gives the chart area some height before D3 draws into it */
 .chart-root {
   min-height: 300px;
+}
+
+/* Grid wrapper for the histogram and letter-grade chart. */
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+/* Card around each individual chart. */
+.chart-panel {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #f8fafc;
+  padding: 12px;
+}
+
+/* Small heading above each chart. */
+.chart-panel-title {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+
+/* Mount point that D3 fills with an SVG. */
+.chart-panel-root {
+  min-height: 280px;
 }
 
 /* Placeholder text shown before a valid chart can be displayed */
@@ -246,6 +287,11 @@ th {
 
   .page-content {
     padding: 14px;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .panel {

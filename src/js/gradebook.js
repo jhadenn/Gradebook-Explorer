@@ -274,6 +274,63 @@
     return frequencies;
   }
 
+  // Reorders student rows by one assessment column and keeps aligned row data synchronized.
+  function sortRowsByColumn(gradebook, colIndex, direction) {
+    if (!isValidColumnIndex(gradebook, colIndex)) {
+      return false;
+    }
+
+    const sortDirection = direction === "desc" ? "desc" : "asc";
+    const combinedRows = gradebook.rows.map(function combineRowData(row, index) {
+      return {
+        row: row,
+        rawGrades: gradebook.rawMatrix[index],
+        rawRow: gradebook.rawRows[index + 1],
+        originalIndex: index
+      };
+    });
+
+    combinedRows.sort(function compareRows(left, right) {
+      const leftValue = parseNumericGrade(left.row.grades[colIndex]);
+      const rightValue = parseNumericGrade(right.row.grades[colIndex]);
+
+      if (leftValue === null && rightValue === null) {
+        return left.originalIndex - right.originalIndex;
+      }
+
+      if (leftValue === null) {
+        return 1;
+      }
+
+      if (rightValue === null) {
+        return -1;
+      }
+
+      if (leftValue === rightValue) {
+        return left.originalIndex - right.originalIndex;
+      }
+
+      return sortDirection === "desc" ? rightValue - leftValue : leftValue - rightValue;
+    });
+
+    gradebook.rows = combinedRows.map(function extractRow(entry) {
+      return entry.row;
+    });
+    gradebook.rawMatrix = combinedRows.map(function extractRawGrades(entry) {
+      return entry.rawGrades;
+    });
+    gradebook.rawRows = [gradebook.rawRows[0]].concat(
+      combinedRows.map(function extractRawRow(entry) {
+        return entry.rawRow;
+      })
+    );
+    gradebook.students = gradebook.rows.map(function extractStudent(row) {
+      return row.student;
+    });
+
+    return true;
+  }
+
   // Creates a gradebook object from the fallback sample dataset
   function createSampleGradebook() {
     return parseGradeData(cloneRows(SAMPLE_DATA));
@@ -319,6 +376,7 @@
     computeSummary: computeSummary,
     numericToLetterGrade: numericToLetterGrade,
     computeLetterGradeFrequencies: computeLetterGradeFrequencies,
+    sortRowsByColumn: sortRowsByColumn,
     createSampleGradebook: createSampleGradebook,
     loadGradesAsync: loadGradesAsync,
     isValidRowIndex: isValidRowIndex,
