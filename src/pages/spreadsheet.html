@@ -1,36 +1,77 @@
-<!-- src/pages/spreadsheet.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gradebook Explorer</title>
-
-  <!-- Lab CS -->
   <link rel="stylesheet" href="../css/spreadsheet.css" />
-
-  <!-- jQuery (Lab 05) -->
-  <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
-
-  <!-- D3 (Lab 06) -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
-  
-  <!-- Lab JS -->
   <script src="../js/gradebook.js" defer></script>
   <script src="../js/chart.js" defer></script>
   <script src="../js/spreadsheet.js" defer></script>
-  
 </head>
-
 <body>
   <header class="page-header">
-    <h1>Gradebook Explorer</h1>
-    <p class="subtitle">
-      Explore a gradebook by selecting rows/columns, editing marks, and visualizing grade distributions.
-    </p>
+    <div class="page-header-inner">
+      <h1>Gradebook Explorer</h1>
+      <p class="subtitle">
+        Explore a gradebook by selecting rows or columns, editing marks, and visualizing
+        grade distributions.
+      </p>
+    </div>
   </header>
 
-  <!-- Spreadsheet here -->
+  <main class="page-content">
+    <section class="panel selection-summary-container" aria-labelledby="selection-summary-title">
+      <h2 id="selection-summary-title">Selection Summary</h2>
+      <div class="summary-grid">
+        <div class="summary-card">
+          <span class="summary-label">Selected</span>
+          <strong id="selected-label">None: -</strong>
+        </div>
+        <div class="summary-card">
+          <span class="summary-label">Count</span>
+          <strong id="selected-count">0</strong>
+        </div>
+        <div class="summary-card">
+          <span class="summary-label">Mean</span>
+          <strong id="selected-mean">-</strong>
+        </div>
+        <div class="summary-card">
+          <span class="summary-label">Min</span>
+          <strong id="selected-min">-</strong>
+        </div>
+        <div class="summary-card">
+          <span class="summary-label">Max</span>
+          <strong id="selected-max">-</strong>
+        </div>
+      </div>
 
+      <div class="instructions-panel">
+        <h3>Instructions</h3>
+        <ul>
+          <li>Click a <strong>column header</strong> to select an assessment.</li>
+          <li>Click a <strong>row header</strong> to select a student.</li>
+          <li>Click a <strong>grade cell</strong> to edit; press <strong>ENTER</strong> to save.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="panel table-container" aria-labelledby="gradebook-title">
+      <div class="section-header">
+        <h2 id="gradebook-title">Gradebook</h2>
+        <p id="gradebook-status" class="status-message">Loading grades...</p>
+      </div>
+      <div id="gradebook-table-container" class="table-scroll" aria-live="polite"></div>
+    </section>
+
+    <section class="panel chart-container" aria-labelledby="chart-title">
+      <h2 id="chart-title">Grade Distribution (A-F)</h2>
+      <div id="chart-root" class="chart-root">
+        <p class="chart-placeholder">Select a row or column to visualize the current grade distribution.</p>
+      </div>
+    </section>
+  </main>
 </body>
 </html>
