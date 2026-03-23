@@ -4,19 +4,23 @@
 (function initializeSpreadsheet(global, $) {
   "use strict";
 
+  // Shared helper modules loaded before this controller
   const model = global.GradebookModel;
   const chart = global.GradebookChart;
 
+  // Central UI state for the current dataset, active selection, and active editor
   const appState = {
     gradebook: null,
     selection: null,
     editingCell: null
   };
 
+  // Formats a summary value for display, or shows a dash when unavailable
   function formatStat(value) {
     return value === null ? "-" : value.toFixed(2);
   }
 
+  // Returns the numeric values for the currently selected row or column
   function getSelectionValues() {
     if (!appState.selection || !appState.gradebook) {
       return [];
@@ -33,6 +37,7 @@
     return [];
   }
 
+  // Builds the user-facing summary label for the current selection
   function getSelectionLabel() {
     if (!appState.selection || !appState.gradebook) {
       return "None: -";
@@ -45,6 +50,7 @@
     return "Column: " + appState.gradebook.assessments[appState.selection.index];
   }
 
+  // Recomputes and redraws the selection summary panel
   function renderSummary() {
     const values = getSelectionValues();
     const summary = model.computeSummary(values);
@@ -56,6 +62,7 @@
     $("#selected-max").text(formatStat(summary.max));
   }
 
+  // Replaces the chart area with either a placeholder or a fresh D3 chart
   function renderChartForSelection() {
     const values = getSelectionValues();
 
@@ -71,17 +78,20 @@
     chart.renderLetterGradeChart("#chart-root", frequencies);
   }
 
+  // Updates every output that depends on the current selection
   function updateSelectionOutputs() {
     renderSummary();
     renderChartForSelection();
   }
 
+  // Clears any existing selection highlight and resets the output panels
   function deselectAll() {
     $("#gradebook-table .selected").removeClass("selected");
     appState.selection = null;
     updateSelectionOutputs();
   }
 
+  // Highlights all non-header cells in the specified student row
   function selectRow(rowIndex) {
     if (!model.isValidRowIndex(appState.gradebook, rowIndex)) {
       return;
@@ -96,6 +106,7 @@
     updateSelectionOutputs();
   }
 
+  // Highlights all non-header cells in the specified assessment column
   function selectColumn(colIndex) {
     if (!model.isValidColumnIndex(appState.gradebook, colIndex)) {
       return;
@@ -110,6 +121,7 @@
     updateSelectionOutputs();
   }
 
+  // Dynamically builds the HTML table from the parsed gradebook data
   function renderGradebookTable(gradebook) {
     const table = $("<table>", {
       id: "gradebook-table"
@@ -170,6 +182,7 @@
     $("#gradebook-table-container").empty().append(table);
   }
 
+  // Closes the current editor and optionally writes the edited value back to the model
   function stopEditingCell(saveChanges) {
     if (!appState.editingCell) {
       return;
@@ -199,6 +212,7 @@
     }
   }
 
+  // Replaces a grade cell's text with a text input for inline editing
   function startEditingCell(cellElement) {
     const cell = $(cellElement);
 
@@ -226,24 +240,29 @@
     input.trigger("focus").trigger("select");
   }
 
+  // Attaches delegated handlers after the table has been rendered
   function attachEventHandlers() {
     const table = $("#gradebook-table");
     table.off();
 
+    // Clicking a student name selects that entire row
     table.on("click", "th.row-header", function handleRowClick() {
       stopEditingCell(true);
       selectRow(Number($(this).attr("data-row-index")));
     });
 
+    // Clicking an assessment header selects that entire column
     table.on("click", "th.column-header", function handleColumnClick() {
       stopEditingCell(true);
       selectColumn(Number($(this).attr("data-col-index")));
     });
 
+    // Clicking a grade cell switches that cell into edit mode
     table.on("click", "td.grade-cell", function handleCellClick() {
       startEditingCell(this);
     });
 
+    // ENTER saves edits; ESC restores the previous value
     table.on("keydown", ".cell-editor", function handleEditorKeydown(event) {
       if (event.key === "Enter") {
         event.preventDefault();
@@ -254,15 +273,18 @@
       }
     });
 
+    // Leaving the field also commits the current value
     table.on("blur", ".cell-editor", function handleEditorBlur() {
       stopEditingCell(true);
     });
   }
 
+  // Updates the small status line shown above the table
   function setStatus(message) {
     $("#gradebook-status").text(message);
   }
 
+  // Initializes the full page once a usable gradebook dataset is available
   function initializePage(gradebook, statusMessage) {
     appState.gradebook = gradebook;
     appState.selection = null;
@@ -273,6 +295,7 @@
     setStatus(statusMessage);
   }
 
+  // Tries to load the CSV first and falls back to sample data if needed
   function loadGradebook() {
     model
       .loadGradesAsync("../data/grades.csv")
@@ -285,6 +308,7 @@
       });
   }
 
+  // Show the initial placeholder, then load the dataset once the DOM is ready
   $(function onReady() {
     chart.showChartPlaceholder(
       "#chart-root",
@@ -293,6 +317,7 @@
     loadGradebook();
   });
 
+  // Expose the lab-required selection helpers globally
   global.deselectAll = deselectAll;
   global.selectRow = selectRow;
   global.selectColumn = selectColumn;

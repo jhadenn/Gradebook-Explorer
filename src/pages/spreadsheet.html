@@ -1,17 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Basic metadata and responsive viewport configuration -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gradebook Explorer</title>
+
+  <!-- Application stylesheet -->
   <link rel="stylesheet" href="../css/spreadsheet.css" />
+
+  <!-- External libraries used for interactivity and chart rendering -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+
+  <!-- Project scripts: data/model helpers, charting, then page controller -->
   <script src="../js/gradebook.js" defer></script>
   <script src="../js/chart.js" defer></script>
   <script src="../js/spreadsheet.js" defer></script>
 </head>
 <body>
+  <!-- Top-level header introducing the app and its purpose -->
   <header class="page-header">
     <div class="page-header-inner">
       <h1>Gradebook Explorer</h1>
@@ -23,6 +31,7 @@
   </header>
 
   <main class="page-content">
+    <!-- Summary panel for the currently selected row or column -->
     <section class="panel selection-summary-container" aria-labelledby="selection-summary-title">
       <h2 id="selection-summary-title">Selection Summary</h2>
       <div class="summary-grid">
@@ -48,6 +57,7 @@
         </div>
       </div>
 
+      <!-- Quick instructions for the main spreadsheet interactions -->
       <div class="instructions-panel">
         <h3>Instructions</h3>
         <ul>
@@ -58,6 +68,7 @@
       </div>
     </section>
 
+    <!-- Empty table container; JavaScript renders the gradebook here from the dataset -->
     <section class="panel table-container" aria-labelledby="gradebook-title">
       <div class="section-header">
         <h2 id="gradebook-title">Gradebook</h2>
@@ -66,6 +77,7 @@
       <div id="gradebook-table-container" class="table-scroll" aria-live="polite"></div>
     </section>
 
+    <!-- Chart container used by D3 to render the current grade distribution -->
     <section class="panel chart-container" aria-labelledby="chart-title">
       <h2 id="chart-title">Grade Distribution (A-F)</h2>
       <div id="chart-root" class="chart-root">

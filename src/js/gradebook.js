@@ -4,13 +4,22 @@
 (function initializeGradebookModel(global) {
   "use strict";
 
+  // Small built-in dataset used for informal testing and CSV load fallback
+  const SAMPLE_DATA = [
+    ["Student", "Lab 1", "Lab 2", "Lab 3", "Midterm", "Final"],
+    ["Ava", "92", "85", "88", "79", "91"],
+    ["Noah", "76", "81", "74", "69", "72"],
+    ["Mia", "88", "90", "84", "93", "86"]
+  ];
 
+  // Creates a copy of a two-dimensional array so the sample data stays unchanged
   function cloneRows(rows) {
     return rows.map(function copyRow(row) {
       return row.slice();
     });
   }
 
+  // Converts simple CSV text into an array of row arrays
   function parseCsvText(csvText) {
     return csvText
       .trim()
@@ -27,6 +36,7 @@
       });
   }
 
+  // Safely turns grade-like input into a finite number or returns null when invalid
   function parseNumericGrade(value) {
     if (value === null || value === undefined) {
       return null;
@@ -46,6 +56,7 @@
     return Number.isFinite(parsedValue) ? parsedValue : null;
   }
 
+  // Normalizes CSV-style rows into a structure that is easy to access by row and column
   function parseGradeData(rawRows) {
     if (!Array.isArray(rawRows) || rawRows.length === 0) {
       return {
@@ -95,6 +106,7 @@
     };
   }
 
+  // Checks whether a requested row index points to a real student row
   function isValidRowIndex(gradebook, rowIndex) {
     return Boolean(
       gradebook &&
@@ -105,6 +117,7 @@
     );
   }
 
+  // Checks whether a requested column index points to a real assessment column
   function isValidColumnIndex(gradebook, colIndex) {
     return Boolean(
       gradebook &&
@@ -115,10 +128,12 @@
     );
   }
 
+  // Ensures that a coordinate refers to a non-header grade cell
   function isGradeCellPosition(gradebook, rowIndex, colIndex) {
     return isValidRowIndex(gradebook, rowIndex) && isValidColumnIndex(gradebook, colIndex);
   }
 
+  // Returns one row or one column as numeric values only, skipping invalid entries
   function getNumericArray(gradebook, index, isRow) {
     if (isRow === undefined) {
       isRow = true;
@@ -149,6 +164,7 @@
       });
   }
 
+  // Returns the raw string value stored in a grade cell
   function getCellRawValue(gradebook, rowIndex, colIndex) {
     if (!isGradeCellPosition(gradebook, rowIndex, colIndex)) {
       return "";
@@ -157,6 +173,7 @@
     return gradebook.rows[rowIndex].grades[colIndex];
   }
 
+  // Updates all in-memory representations of a single grade cell
   function setCellValue(gradebook, rowIndex, colIndex, value) {
     if (!isGradeCellPosition(gradebook, rowIndex, colIndex)) {
       return false;
@@ -169,6 +186,7 @@
     return true;
   }
 
+  // Computes count, mean, minimum, and maximum while ignoring invalid grades
   function computeSummary(values) {
     const numericValues = values
       .map(parseNumericGrade)
@@ -197,6 +215,7 @@
     };
   }
 
+  // Maps numeric grades into the A-F buckets used by the chart
   function numericToLetterGrade(value) {
     const numericValue = parseNumericGrade(value);
 
@@ -223,6 +242,7 @@
     return "F";
   }
 
+  // Converts numeric grades into normalized A-F frequencies for visualization
   function computeLetterGradeFrequencies(values) {
     const keys = ["A", "B", "C", "D", "F"];
     const frequencies = {
@@ -254,17 +274,12 @@
     return frequencies;
   }
 
-    const SAMPLE_DATA = [
-    ["Student", "Lab 1", "Lab 2", "Lab 3", "Midterm", "Final"],
-    ["Ava", "92", "85", "88", "79", "91"],
-    ["Noah", "76", "81", "74", "69", "72"],
-    ["Mia", "88", "90", "84", "93", "86"]
-  ];
-
+  // Creates a gradebook object from the fallback sample dataset
   function createSampleGradebook() {
     return parseGradeData(cloneRows(SAMPLE_DATA));
   }
 
+  // Loads the CSV file asynchronously, then parses it into the gradebook structure
   function loadGradesAsync(filePath) {
     const resolvedPath = filePath || "../data/grades.csv";
 
@@ -281,6 +296,7 @@
       });
   }
 
+  // Informal console checks requested by the lab instructions
   function runInformalTests() {
     const sampleGradebook = createSampleGradebook();
     console.log("Gradebook sample headers:", sampleGradebook.headers);
@@ -291,6 +307,7 @@
     console.log("Gradebook ignores invalid number:", parseNumericGrade("not-a-grade"));
   }
 
+  // Expose the model utilities globally so the other page scripts can reuse them
   global.GradebookModel = {
     SAMPLE_DATA: cloneRows(SAMPLE_DATA),
     parseCsvText: parseCsvText,
@@ -310,5 +327,6 @@
     runInformalTests: runInformalTests
   };
 
+  // Run the informal tests on script load
   runInformalTests();
 })(window);

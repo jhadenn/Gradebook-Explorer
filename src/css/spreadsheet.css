@@ -1,3 +1,4 @@
+/* Shared design tokens used throughout the gradebook page */
 :root {
   --page-bg: #eef2f8;
   --panel-bg: #ffffff;
@@ -11,10 +12,12 @@
   --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
+/* Use predictable box sizing for all elements */
 * {
   box-sizing: border-box;
 }
 
+/* Global page styles. */
 body {
   margin: 0;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -22,17 +25,20 @@ body {
   color: var(--text-main);
 }
 
+/* Dark page header containing the title and subtitle */
 .page-header {
   background: var(--header-bg);
   color: #f8fafc;
   padding: 28px 24px;
 }
 
+/* Constrains header content to the same width as the main layout */
 .page-header-inner {
   max-width: 1024px;
   margin: 0 auto;
 }
 
+/* Reset default spacing for key text elements */
 h1,
 h2,
 h3,
@@ -40,11 +46,13 @@ p {
   margin: 0;
 }
 
+/* Main page title styling */
 h1 {
   font-size: clamp(2rem, 4vw, 2.6rem);
   font-weight: 800;
 }
 
+/* Supporting description beneath the page title */
 .subtitle {
   margin-top: 10px;
   max-width: 720px;
@@ -53,12 +61,14 @@ h1 {
   color: #e2e8f0;
 }
 
+/* Main content wrapper for the summary, table, and chart panels */
 .page-content {
   max-width: 1024px;
   margin: 0 auto;
   padding: 18px;
 }
 
+/* Shared panel card styling */
 .panel {
   background: var(--panel-bg);
   border: 1px solid var(--border);
@@ -68,6 +78,7 @@ h1 {
   margin-bottom: 18px;
 }
 
+/* Main section headings inside the content panels */
 .selection-summary-container h2,
 .table-container h2,
 .chart-container h2 {
@@ -75,6 +86,7 @@ h1 {
   margin-bottom: 12px;
 }
 
+/* Responsive grid for the summary metrics */
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -82,6 +94,7 @@ h1 {
   margin-bottom: 12px;
 }
 
+/* Shared card styling for summary items and the instructions block */
 .summary-card,
 .instructions-panel {
   background: #f8fafc;
@@ -90,6 +103,7 @@ h1 {
   padding: 12px;
 }
 
+/* Small label shown above each summary value */
 .summary-label {
   display: block;
   color: var(--text-muted);
@@ -97,35 +111,42 @@ h1 {
   margin-bottom: 4px;
 }
 
+/* Slight emphasis for the metric values */
 .summary-card strong {
   font-size: 1rem;
 }
 
+/* Instruction panel heading */
 .instructions-panel h3 {
   font-size: 1.05rem;
   margin-bottom: 10px;
 }
 
+/* Default spacing for the instruction list */
 .instructions-panel ul {
   margin: 0;
   padding-left: 24px;
 }
 
+/* Small status message shown above the generated table */
 .status-message {
   color: var(--text-muted);
   font-size: 0.95rem;
 }
 
+/* Enables horizontal scrolling for the table on narrower screens */
 .table-scroll {
   overflow-x: auto;
 }
 
+/* Base table layout */
 table {
   width: 100%;
   min-width: 720px;
   border-collapse: collapse;
 }
 
+/* Shared cell sizing and borders */
 th,
 td {
   border: 1px solid var(--grid-border);
@@ -134,36 +155,43 @@ td {
   font-size: 1rem;
 }
 
+/* Column and row header styling required by the lab */
 th {
   background: var(--header-cell);
   font-weight: 800;
 }
 
+/* Keeps the student column wide enough to read names comfortably */
 .corner-header,
 .row-header {
   min-width: 140px;
 }
 
+/* Indicates that row and column headers are interactive */
 .column-header,
 .row-header {
   cursor: pointer;
   user-select: none;
 }
 
+/* Default appearance of editable grade cells */
 .grade-cell {
   background: #ffffff;
   transition: background-color 120ms ease-in-out;
   cursor: text;
 }
 
+/* Selection highlight color required by the lab instructions */
 .selected {
   background: var(--selected-cell);
 }
 
+/* Slightly tighter padding while a cell is in edit mode */
 .editing-cell {
   padding: 10px 12px;
 }
 
+/* Input used for inline cell editing */
 .cell-editor {
   width: 100%;
   border: 2px solid #93c5fd;
@@ -174,36 +202,43 @@ th {
   background: #ffffff;
 }
 
+/* Gives the chart area some height before D3 draws into it */
 .chart-root {
   min-height: 300px;
 }
 
+/* Placeholder text shown before a valid chart can be displayed */
 .chart-placeholder {
   color: var(--text-muted);
   padding-top: 12px;
 }
 
+/* Makes the SVG scale with the panel width */
 .chart-svg {
   width: 100%;
   height: auto;
   display: block;
 }
 
+/* Shared text styling for axis labels and tick labels */
 .axis-label,
 .tick text {
   fill: var(--text-main);
   font-size: 0.9rem;
 }
 
+/* Axis line styling for the D3 chart */
 .tick line,
 .domain {
   stroke: var(--text-main);
 }
 
+/* Bar fill for the grade distribution chart */
 .chart-bar {
   fill: #050505;
 }
 
+/* Tighter spacing on smaller screens */
 @media (max-width: 720px) {
   .page-header {
     padding: 24px 18px;
